@@ -333,7 +333,7 @@ void main() {
 
     // Dissolving edge: a wobbly rounded rect, eaten away pixel by pixel.
     vec2 halfRes = uRes * 0.5;
-    float radius = uBorder * 1.5;
+    float radius = uBorder * 2.5;
     vec2 e = abs(frag - halfRes) - (halfRes - radius);
     float inside = -(length(max(e, 0.0)) + min(max(e.x, e.y), 0.0) - radius);
     float wobble = (fbm(frag / (uBorder * 2.5)) - 0.5) * uBorder * 1.4
