@@ -7,7 +7,7 @@ export default function Home() {
     <main className="flex flex-1 flex-col items-center overflow-x-clip px-4 pt-20 pb-20">
       <div className="flex w-full max-w-[550px] flex-col gap-4 text-body text-ink">
         <header className="flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-1 whitespace-nowrap">
+          <div className="flex flex-col gap-1 whitespace-nowrap leading-[normal]">
             <h1>Beam Sereeyothin</h1>
             <p className="text-muted">Engineer &amp; Designer</p>
           </div>

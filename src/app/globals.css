@@ -12,7 +12,7 @@
   --color-brand: #3352ff;
 
   --text-body: 14px;
-  --text-body--line-height: normal;
+  --text-body--line-height: 20px;
   --text-body--letter-spacing: -0.035px;
 }
 
