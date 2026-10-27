@@ -9,7 +9,7 @@
 @theme {
   --color-background: #ffffff;
   --color-ink: #303036;
-  --color-muted: #aaaab9;
+  --color-muted: #9d9dad;
   --color-surface: #f7f7f9;
   --color-brand: #3352ff;
 
@@ -22,7 +22,29 @@
 
   --text-body: 14px;
   --text-body--line-height: 20px;
-  --text-body--letter-spacing: -0.035px;
+  --text-body--letter-spacing: -0.015px;
+  --text-body--font-weight: 415;
+
+  /* A flip clock digit: the flap folds from the top half to the bottom, and
+     the pieces around it stay visible only while it does. */
+  --animate-flip-fold: flip-fold 200ms cubic-bezier(0.77, 0, 0.175, 1) both;
+  --animate-flip-hold: flip-hold 200ms;
+
+  @keyframes flip-fold {
+    from {
+      transform: rotateX(0deg);
+    }
+    to {
+      transform: rotateX(-180deg);
+    }
+  }
+
+  @keyframes flip-hold {
+    from,
+    to {
+      visibility: visible;
+    }
+  }
 
   /* A bar springs up from its baseline, overshooting a little as it lands. */
   --animate-bar-in: bar-grow 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both, bar-fade 300ms ease both;
