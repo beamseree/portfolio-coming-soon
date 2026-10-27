@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { getTheme, subscribeTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 type DitherSkyProps = {
@@ -17,7 +18,7 @@ type DitherSkyProps = {
     speed?: number;
     /** Re-roll the edge speckle a few times a second, like boiling line art. */
     boil?: boolean;
-    /** A small bird that glides across now and then. */
+    /** A small bird that glides across now and then (by day). */
     bird?: boolean;
     /** Seed for the cloud layout. */
     seed?: number;
@@ -72,6 +73,9 @@ function cloudCounts(aspect: number) {
 
 const MAX_PUFFS = 64;
 const HEADER_TEXELS = 3;
+
+// How long the sky takes to turn from day to night when the theme changes.
+const DUSK_SECONDS = 0.5;
 
 function mulberry32(seed: number) {
     let a = seed >>> 0;
@@ -206,6 +210,7 @@ uniform float uBorder;      // dissolve band, pixels
 uniform float uGrain;
 uniform float uLevels;
 uniform float uBird;
+uniform float uNight;       // 0 by day, 1 at night, eased in between
 
 out vec4 outColor;
 
@@ -217,6 +222,15 @@ const vec3 MID     = vec3(0.886, 0.910, 0.957);  // #E2E8F4
 const vec3 LIGHT   = vec3(0.965, 0.945, 0.910);  // #F6F1E8
 const vec3 BIRD    = vec3(0.420, 0.490, 0.620);
 const vec3 SUN     = vec3(-0.3, 0.8, 0.5);
+
+// The same clouds by moonlight: dark bodies with silvery crowns.
+const vec3 NIGHT_TOP   = vec3(0.039, 0.059, 0.153);  // #0A0F27
+const vec3 NIGHT_LOW   = vec3(0.106, 0.141, 0.294);  // #1B244B
+const vec3 NIGHT_SHADE = vec3(0.086, 0.106, 0.212);  // #161B36
+const vec3 NIGHT_MID   = vec3(0.169, 0.200, 0.337);  // #2B3356
+const vec3 NIGHT_LIGHT = vec3(0.373, 0.408, 0.553);  // #5F688D
+const vec3 STAR        = vec3(0.925, 0.937, 1.000);
+const float STAR_CELL  = 0.032;
 
 float hash(vec2 p) {
     vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -253,8 +267,24 @@ float segment(vec2 p, vec2 a, vec2 b) {
 }
 
 vec3 sky(vec2 p) {
-    vec3 c = mix(SKY_LOW, SKY_TOP, smoothstep(0.0, 0.9, p.y));
-    return c + (fbm(p * 3.0 + vec2(uTime * 0.01, 0.0)) - 0.5) * 0.02;
+    float h = smoothstep(0.0, 0.9, p.y);
+    vec3 c = mix(mix(SKY_LOW, NIGHT_LOW, uNight), mix(SKY_TOP, NIGHT_TOP, uNight), h);
+    return c +(fbm(p * 3.0 + vec2(uTime * 0.01, 0.0)) - 0.5) * 0.02;
+}
+
+// At most one star per grid cell, each twinkling on its own clock. The few
+// bright ones get a little cross.
+float stars(vec2 p, float pxW) {
+    vec2 cell = floor(p / STAR_CELL);
+    if (hash(cell + 3.7) > 0.3) return 0.0;
+    vec2 at = (cell + 0.2 + 0.6 * vec2(hash(cell + 17.3), hash(cell + 41.9))) * STAR_CELL;
+    vec2 d = abs(p - at) / pxW;
+    float size = hash(cell + 5.1);
+    float shape = step(max(d.x, d.y), 0.5);
+    if (size > 0.92) shape = max(shape, step(min(d.x, d.y), 0.5) * step(max(d.x, d.y), 1.5) * 0.55);
+    if (shape <= 0.0) return 0.0;
+    float twinkle = 0.55 + 0.45 * sin(uTime * mix(1.0, 3.5, hash(cell + 9.7)) + hash(cell) * 40.0);
+    return shape * mix(0.35, 1.0, size * size) * twinkle * smoothstep(0.08, 0.55, p.y);
 }
 
 void main() {
@@ -267,8 +297,32 @@ void main() {
     vec3 skyCol = sky(p);
     vec3 col = skyCol;
 
+    // Night only: stars and, now and then, a shooting star, both behind the
+    // clouds.
+    if (uNight > 0.0) {
+        col = mix(col, STAR, stars(p, pxW) * uNight);
+
+        float period = 9.0;
+        float n = floor(uTime / period);
+        float k = (uTime - n * period) / 0.9;
+        if (k < 1.0 && hash(vec2(n, 3.1)) < 0.75) {
+            float side = hash(vec2(n, 5.9)) < 0.5 ? -1.0 : 1.0;
+            vec2 dir = normalize(vec2(side, -0.42));
+            vec2 start = vec2(mix(0.15, aspect - 0.15, hash(vec2(n, 1.7))), mix(0.72, 0.95, hash(vec2(n, 2.3))));
+            vec2 head = start + dir * k * 0.7;
+            vec2 tail = head - dir * 0.16 * sin(k * 3.1416);
+            vec2 ht = head - tail;
+            float along = clamp(dot(p - tail, ht) / max(dot(ht, ht), 1e-6), 0.0, 1.0);
+            float streak = clamp(1.0 - segment(p, tail, head) / pxW, 0.0, 1.0);
+            col = mix(col, STAR, streak * along * along * sin(k * 3.1416) * uNight);
+        }
+    }
+
     // Clouds, back to front.
     vec3 sun = normalize(SUN);
+    vec3 toneShade = mix(SHADE, NIGHT_SHADE, uNight);
+    vec3 toneMid = mix(MID, NIGHT_MID, uNight);
+    vec3 toneLight = mix(LIGHT, NIGHT_LIGHT, uNight);
     for (int i = 0; i < uCloudCount; i++) {
         vec4 head = texelFetch(uClouds, ivec2(0, i), 0);
         vec4 box = texelFetch(uClouds, ivec2(1, i), 0);
@@ -299,8 +353,8 @@ void main() {
             float s = (dot(nrm, sun) * 0.5 + 0.5) * mix(0.55, 1.0, light);
             s += height * 0.1 - pow(1.0 - height, 3.0) * 0.15;
             s += (noise(lp * 90.0) - 0.5) * 0.05;
-            vec3 shaded = mix(SHADE, MID, smoothstep(0.33, 0.39, s));
-            shaded = mix(shaded, LIGHT, smoothstep(0.58, 0.64, s));
+            vec3 shaded = mix(toneShade, toneMid, smoothstep(0.33, 0.39, s));
+            shaded = mix(shaded, toneLight, smoothstep(0.58, 0.64, s));
 
             cloudCol = cover == 0.0 ? shaded : mix(cloudCol, shaded, c);
             cover = max(cover, c);
@@ -311,8 +365,9 @@ void main() {
         }
     }
 
-    // A bird glides across every so often, flapping in bursts.
-    if (uBird > 0.5) {
+    // A bird glides across every so often, flapping in bursts. It roosts at
+    // night.
+    if (uBird > 0.5 && uNight < 1.0) {
         float crossing = (aspect + 0.1) / 0.08;
         float k = mod(uTime + 6.0, crossing + 12.0) / crossing;
         if (k < 1.0) {
@@ -323,7 +378,7 @@ void main() {
             float tip = 0.25 + 0.55 * sin(uTime * 11.0) * flapping;
             float wing = min(segment(q, vec2(0.0), vec2(-1.0, tip)), segment(q, vec2(0.0), vec2(1.0, tip)));
             float bcov = clamp(1.0 - wing * span / pxW, 0.0, 1.0);
-            col = mix(col, BIRD, bcov * 0.8);
+            col = mix(col, BIRD, bcov * 0.8 * (1.0 - uNight));
         }
     }
 
@@ -360,11 +415,14 @@ function compile(gl: WebGL2RenderingContext, type: number, source: string) {
     return shader;
 }
 
+const isNight = () => (getTheme() === "dark" ? 1 : 0);
+
 /**
  * Animated painted sky: cumulus clouds drifting in parallax layers, finished
- * with ordered dithering, film grain and a speckled, dissolving edge. Fills its
- * parent. Pauses off-screen and in hidden tabs, and holds a still frame when
- * the visitor prefers reduced motion.
+ * with ordered dithering, film grain and a speckled, dissolving edge. Follows
+ * the site theme, turning to a starry night in the dark theme. Fills
+ * its parent. Pauses off-screen and in hidden tabs, and holds a still frame
+ * when the visitor prefers reduced motion.
  */
 export function DitherSky({
     className,
@@ -444,7 +502,7 @@ export function DitherSky({
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-            const names = ["uRes", "uTime", "uGrainSeed", "uBoilSeed", "uClouds", "uCloudCount", "uBorder", "uGrain", "uLevels", "uBird"];
+            const names = ["uRes", "uTime", "uGrainSeed", "uBoilSeed", "uClouds", "uCloudCount", "uBorder", "uGrain", "uLevels", "uBird", "uNight"];
             uniforms = Object.fromEntries(names.map((name) => [name, gl.getUniformLocation(program, name)]));
             uploadClouds();
             gl.uniform1i(uniforms.uClouds, 0);
@@ -463,6 +521,9 @@ export function DitherSky({
 
         // Drift time only advances while playing, so pausing never jumps.
         let elapsed = 0;
+        // 0 by day, 1 at night. Starts where the theme is, then walks toward it.
+        let night = isNight();
+        let nightTarget = night;
         const draw = () => {
             const { width, height } = canvas;
             gl.viewport(0, 0, width, height);
@@ -471,6 +532,7 @@ export function DitherSky({
             gl.uniform1f(uniforms.uTime, elapsed * speed);
             gl.uniform1f(uniforms.uGrainSeed, Math.floor(elapsed * 12) % 997);
             gl.uniform1f(uniforms.uBoilSeed, boil ? Math.floor(elapsed * 6) % 997 : 0);
+            gl.uniform1f(uniforms.uNight, night * night * (3 - 2 * night));
             gl.drawArrays(gl.TRIANGLES, 0, 3);
         };
 
@@ -487,6 +549,8 @@ export function DitherSky({
             last = now;
             if (pending < frameMs - 2) return;
             elapsed += pending / 1000;
+            const step = pending / 1000 / DUSK_SECONDS;
+            night = nightTarget > night ? Math.min(nightTarget, night + step) : Math.max(nightTarget, night - step);
             pending = 0;
             draw();
         };
@@ -528,6 +592,16 @@ export function DitherSky({
             sync();
         };
 
+        const unsubscribeTheme = subscribeTheme(() => {
+            nightTarget = isNight();
+            // Nothing's playing to carry it over (reduced motion, off-screen),
+            // so cut straight to it.
+            if (!raf && !gl.isContextLost()) {
+                night = nightTarget;
+                draw();
+            }
+        });
+
         canvas.addEventListener("webglcontextlost", onLost);
         canvas.addEventListener("webglcontextrestored", onRestored);
         document.addEventListener("visibilitychange", sync);
@@ -535,6 +609,7 @@ export function DitherSky({
         sync();
 
         return () => {
+            unsubscribeTheme();
             cancelAnimationFrame(raf);
             resize.disconnect();
             visibility.disconnect();
@@ -550,15 +625,16 @@ export function DitherSky({
             <canvas
                 ref={canvasRef}
                 role="img"
-                aria-label="Clouds drifting across a blue sky"
+                aria-label="Clouds drifting across the sky"
                 className="absolute inset-0 size-full [image-rendering:pixelated]"
             />
+            {/* The still is a day sky; dimmed, it passes for night. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
                 ref={fallbackRef}
                 hidden
-                alt="Clouds across a blue sky"
-                className="absolute inset-0 size-full rounded-lg object-cover"
+                alt="Clouds across the sky"
+                className="absolute inset-0 size-full rounded-lg object-cover dark:brightness-[0.35] dark:saturate-150"
             />
         </div>
     );

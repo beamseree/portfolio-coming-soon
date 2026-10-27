@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { DitherWordmark } from "@/components/site/dither-wordmark";
 import { LocalTime } from "@/components/site/local-time";
+import { ThemeToggle } from "@/components/site/theme-toggle";
 import { VendingSky } from "@/components/site/vending-sky";
 
 export default function Home() {
@@ -43,7 +44,7 @@ export default function Home() {
         </div>
 
         <div className="py-5">
-          <div className="flex items-center justify-center rounded-lg bg-surface px-4 py-[50px]">
+          <div className="flex items-center justify-center rounded-lg bg-surface px-4 py-[50px] transition-colors">
             <Image
               src="/brand/website-coming-soon.svg"
               alt="Website coming soon"
@@ -56,7 +57,10 @@ export default function Home() {
 
         <footer className="flex items-center justify-between whitespace-nowrap text-muted">
           <p>Bangkok, Thailand</p>
-          <LocalTime timeZone="Asia/Bangkok" />
+          <div className="flex items-center gap-3">
+            <LocalTime timeZone="Asia/Bangkok" />
+            <ThemeToggle />
+          </div>
         </footer>
       </div>
     </main>

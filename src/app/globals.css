@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme inline {
   --font-sans: var(--font-muoto), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
@@ -16,9 +18,22 @@
   --text-body--letter-spacing: -0.035px;
 }
 
+/* Set on <html> by the theme script in the root layout. */
+:root[data-theme="dark"] {
+  --color-background: #0f1015;
+  --color-ink: #e6e6ee;
+  --color-muted: #6e6e7d;
+  --color-surface: #18191f;
+  color-scheme: dark;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-ink);
+  /* Matches Tailwind's transition-colors, so the surface card keeps pace. */
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 ::selection {
