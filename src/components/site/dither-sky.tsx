@@ -58,9 +58,9 @@ type Layer = {
 // Back to front. World units: 1 = frame height, so wider frames get more
 // clouds rather than bigger ones.
 const LAYERS: Layer[] = [
-    { density: 2.1, width: [0.55, 0.8], height: [0.14, 0.2], base: [0.28, 0.5], speed: 0.011, fade: 0.2, puffs: 40 },
-    { density: 1.15, width: [0.8, 1.1], height: [0.3, 0.42], base: [-0.06, 0.06], speed: 0.017, fade: 0, puffs: 60 },
-    { density: 3.1, width: [0.28, 0.48], height: [0.05, 0.095], base: [-0.04, 0.06], speed: 0.024, fade: 0, puffs: 24 },
+    { density: 2.1, width: [0.55, 0.8], height: [0.14, 0.2], base: [0.28, 0.5], speed: 0.013, fade: 0.2, puffs: 40 },
+    { density: 1.15, width: [0.8, 1.1], height: [0.3, 0.42], base: [-0.06, 0.06], speed: 0.02, fade: 0, puffs: 60 },
+    { density: 3.1, width: [0.28, 0.48], height: [0.05, 0.095], base: [-0.04, 0.06], speed: 0.029, fade: 0, puffs: 24 },
 ];
 
 /** How many clouds each layer needs to fill a frame of this aspect ratio. */
