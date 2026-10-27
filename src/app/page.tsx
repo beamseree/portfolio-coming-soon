@@ -4,6 +4,20 @@ import { LocalTime } from "@/components/site/local-time";
 import { ThemeToggle } from "@/components/site/theme-toggle";
 import { VendingSky } from "@/components/site/vending-sky";
 
+function TextLink({ href, children }: { href: string; children: string }) {
+  const external = href.startsWith("http");
+  return (
+    <a
+      href={href}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
+      className="text-ink underline decoration-muted/50 decoration-1 underline-offset-[3px] transition-colors hover:decoration-ink"
+    >
+      {children}
+    </a>
+  );
+}
+
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center overflow-x-clip px-4 pt-20 pb-20">
@@ -27,20 +41,37 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col gap-[1lh]">
-          <p>I was born in London and now live in Los Angeles.</p>
-          <p>I currently work at SpaceX as Head of Design for X and SpaceXSI.</p>
           <p>
-            Previously, I led design at Base, a division of Coinbase. Before
-            that, I founded Los Feliz Engineering, a consumer software company
-            that created Honk, a real-time messaging app, and Family, a
-            self-custody crypto wallet. LFE was acquired by Aave Labs, where I
-            served as CPO.
+            I was born in Bangkok, studied in Boston, and now back living in
+            Bangkok.
+          </p>
+          <p>
+            I currently work at{" "}
+            <TextLink href="https://automotionworks.com">
+              Auto Motion Works
+            </TextLink>
+            , an automated warehouse manufacturer and integrator.
+          </p>
+          <p>
+            Previously, I founded <TextLink href="#">BEMO</TextLink>, a
+            branding and web design agency that helped brands build an online
+            presence. Before that, I interned at{" "}
+            <TextLink href="https://bangkoklife.com/en">
+              Bangkok Life Assurance
+            </TextLink>{" "}
+            as a UXUI designer and Thailand’s Ministry of Innovation as an
+            engineer.
           </p>
           <p>
             I enjoy building and maintaining open source tools for interface
             excellence, such as cmdk, Agentation, Liveline, and Drawesome.
           </p>
-          <p>You can find me on X and Instagram, or reach me via email.</p>
+          <p>
+            You can find me on <TextLink href="https://x.com/beamseree">X</TextLink>{" "}
+            and{" "}
+            <TextLink href="https://instagram.com/beamseree">Instagram</TextLink>
+            , or reach me via <TextLink href="#">email</TextLink>.
+          </p>
         </div>
 
         <div className="py-5">
