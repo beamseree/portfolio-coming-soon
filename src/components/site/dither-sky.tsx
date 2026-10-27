@@ -38,7 +38,7 @@ type Puff = { x: number; y: number; r: number; squash: number; light: number };
 
 type Cloud = {
     u: number; // starting position along the wrap, 0–1
-    base: number; // world y of the flat base
+    base: number; // world y of the base
     speed: number; // world units per second
     fade: number; // how far it melts into the sky (distance haze)
     puffs: Puff[];
@@ -57,10 +57,9 @@ type Layer = {
 // Back to front. World units: 1 = frame height, so wider frames get more
 // clouds rather than bigger ones.
 const LAYERS: Layer[] = [
-    { density: 3, width: [0.16, 0.28], height: [0.07, 0.12], base: [0.2, 0.42], speed: 0.006, fade: 0.4, puffs: 20 },
-    { density: 2.6, width: [0.34, 0.5], height: [0.2, 0.3], base: [0.0, 0.14], speed: 0.011, fade: 0.2, puffs: 36 },
-    { density: 1.25, width: [0.5, 0.75], height: [0.55, 0.75], base: [-0.12, -0.02], speed: 0.017, fade: 0, puffs: 60 },
-    { density: 3.5, width: [0.24, 0.42], height: [0.06, 0.12], base: [-0.04, 0.06], speed: 0.024, fade: 0, puffs: 24 },
+    { density: 2.1, width: [0.55, 0.8], height: [0.14, 0.2], base: [0.28, 0.5], speed: 0.011, fade: 0.2, puffs: 40 },
+    { density: 1.15, width: [0.8, 1.1], height: [0.3, 0.42], base: [-0.06, 0.06], speed: 0.017, fade: 0, puffs: 60 },
+    { density: 3.1, width: [0.28, 0.48], height: [0.05, 0.095], base: [-0.04, 0.06], speed: 0.024, fade: 0, puffs: 24 },
 ];
 
 /** How many clouds each layer needs to fill a frame of this aspect ratio. */
@@ -113,9 +112,11 @@ function growCumulus(rand: () => number, width: number, height: number, budget: 
         for (let row = unit * 0.35; row < height; row += unit * range(1.0, 1.3)) {
             for (let x = -halfW + unit * range(0.3, 1); x < halfW - unit * 0.4; x += unit * range(1.3, 1.9)) {
                 const r = unit * (1.5 - 0.6 * (row / height)) * range(0.75, 1.25);
-                const y = row + unit * range(-0.3, 0.3);
+                // The underside sags in the middle and curls up at the ends.
+                const sag = row < unit * 1.5 ? unit * 0.6 * (1 - (x / halfW) ** 2) : 0;
+                const y = row - sag + unit * range(-0.3, 0.3);
                 if (y + r * 0.85 > ceiling(x)) continue;
-                puffs.push({ x, y, r, squash: y < unit ? 0.8 : 1, light: 0 });
+                puffs.push({ x, y, r, squash: 1, light: 0 });
             }
         }
         for (let x = -halfW + unit * 0.5; x < halfW - unit * 0.3; ) {
@@ -163,15 +164,16 @@ function packClouds(clouds: Cloud[], seed: number) {
     clouds.forEach((cloud, row) => {
         const puffs = cloud.puffs.slice(0, MAX_PUFFS);
         // Bounds include a little slack for the puffs' breathing.
-        let minX = Infinity, maxX = -Infinity, maxY = 0;
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = 0;
         for (const p of puffs) {
             minX = Math.min(minX, p.x - p.r * 1.04);
             maxX = Math.max(maxX, p.x + p.r * 1.04);
+            minY = Math.min(minY, p.y - p.r * p.squash * 1.04);
             maxY = Math.max(maxY, p.y + p.r * p.squash * 1.04);
         }
         const o = row * width * 4;
         data.set([cloud.u, cloud.base, cloud.speed, cloud.fade], o);
-        data.set([minX, 0, maxX, maxY], o + 4);
+        data.set([minX, minY, maxX, maxY], o + 4);
         data.set([puffs.length, (seed * 13.37 + row * 7.1) % 100, maxY, 0], o + 8);
         puffs.forEach((p, j) => {
             data.set([p.x, p.y, p.r, p.squash, p.light, 0, 0, 0], o + (HEADER_TEXELS + j * 2) * 4);
@@ -303,7 +305,6 @@ void main() {
             cloudCol = cover == 0.0 ? shaded : mix(cloudCol, shaded, c);
             cover = max(cover, c);
         }
-        cover *= clamp(lp.y / pxW + 0.5, 0.0, 1.0);     // flat base
         if (cover > 0.0) {
             cloudCol = mix(cloudCol, skyCol, head.w);
             col = mix(col, cloudCol, cover);
@@ -368,13 +369,13 @@ function compile(gl: WebGL2RenderingContext, type: number, source: string) {
 export function DitherSky({
     className,
     pixelSize = 1,
-    border = 0.05,
+    border = 0.045,
     grain = 0.035,
     levels = 24,
     speed = 1,
     boil = true,
     bird = true,
-    seed = 7,
+    seed = 4,
     fallbackSrc = "/sky/clouds.webp",
 }: DitherSkyProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);

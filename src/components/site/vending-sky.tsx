@@ -16,7 +16,7 @@ type Machine = Box & {
     crop: [left: number, top: number, width: number, height: number];
 };
 
-const SKY: Box = { x: -55, y: 10, w: 660, h: 195 };
+const SKY: Box = { x: -55, y: 15, w: 660, h: 185 };
 
 const MACHINES: Machine[] = [
     // Top row

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { DitherWordmark } from "@/components/site/dither-wordmark";
 import { LocalTime } from "@/components/site/local-time";
 import { VendingSky } from "@/components/site/vending-sky";
 
@@ -11,13 +12,12 @@ export default function Home() {
             <h1>Beam Sereeyothin</h1>
             <p className="text-muted">Engineer &amp; Designer</p>
           </div>
-          <Image
+          <DitherWordmark
             src="/brand/beamseree.svg"
             alt="@beamseree"
             width={223}
             height={37}
-            preload
-            className="h-auto w-[222.986px] min-w-0"
+            className="w-[200px] min-w-0"
           />
         </header>
 
