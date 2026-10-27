@@ -13,9 +13,31 @@
   --color-surface: #f7f7f9;
   --color-brand: #3352ff;
 
+  /* GitHub's contribution greens, from a day off to the busiest day. */
+  --color-contrib-0: #ebebf0;
+  --color-contrib-1: #9be9a8;
+  --color-contrib-2: #40c463;
+  --color-contrib-3: #30a14e;
+  --color-contrib-4: #216e39;
+
   --text-body: 14px;
   --text-body--line-height: 20px;
   --text-body--letter-spacing: -0.035px;
+
+  /* A bar springs up from its baseline, overshooting a little as it lands. */
+  --animate-bar-in: bar-grow 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both, bar-fade 300ms ease both;
+
+  @keyframes bar-grow {
+    from {
+      transform: scaleY(0);
+    }
+  }
+
+  @keyframes bar-fade {
+    from {
+      opacity: 0;
+    }
+  }
 }
 
 /* Set on <html> by the theme script in the root layout. */
@@ -24,6 +46,11 @@
   --color-ink: #e6e6ee;
   --color-muted: #6e6e7d;
   --color-surface: #18191f;
+  --color-contrib-0: #22232b;
+  --color-contrib-1: #0e4429;
+  --color-contrib-2: #006d32;
+  --color-contrib-3: #26a641;
+  --color-contrib-4: #39d353;
   color-scheme: dark;
 }
 
