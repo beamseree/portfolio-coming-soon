@@ -9,6 +9,7 @@
   --color-ink: #303036;
   --color-muted: #aaaab9;
   --color-surface: #f7f7f9;
+  --color-brand: #3352ff;
 
   --text-body: 14px;
   --text-body--line-height: normal;
@@ -18,4 +19,9 @@
 body {
   background: var(--color-background);
   color: var(--color-ink);
+}
+
+::selection {
+  background: var(--color-brand);
+  color: #ffffff;
 }
