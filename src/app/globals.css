@@ -3,7 +3,7 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
-  --font-sans: var(--font-muoto), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-matte), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme {
@@ -23,7 +23,8 @@
   --text-body: 14px;
   --text-body--line-height: 20px;
   --text-body--letter-spacing: -0.015px;
-  --text-body--font-weight: 415;
+  /* Matte's Regular master, the weight its mockup was drawn at. */
+  --text-body--font-weight: 430;
 
   /* A flip clock digit: the flap folds from the top half to the bottom, and
      the pieces around it stay visible only while it does. */

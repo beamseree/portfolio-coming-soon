@@ -10,15 +10,17 @@ const inter = Inter({
   display: "swap",
 });
 
-const muoto = localFont({
-  variable: "--font-muoto",
+const matte = localFont({
+  variable: "--font-matte",
   display: "swap",
-  // Without this, Next adds a metric-matched Arial right after Muoto, and the
+  // Without this, Next adds a metric-matched Arial right after Matte, and the
   // stack would never reach Inter.
   adjustFontFallback: false,
   src: [
     {
-      path: "./fonts/MuotoTrialVAR.ttf",
+      // Matte 0.100 (github.com/beamseree/matte), cut to Google Fonts' latin
+      // subset; anything outside it falls back to Inter.
+      path: "./fonts/MatteVariable-Latin.woff2",
       weight: "100 900",
       style: "normal",
     },
@@ -34,7 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // The head script sets data-theme before React hydrates, so React would
     // otherwise flag <html> as mismatched.
-    <html lang="en" className={`${muoto.variable} ${inter.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${matte.variable} ${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>
