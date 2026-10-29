@@ -93,6 +93,6 @@ body {
 }
 
 ::selection {
-  background: var(--color-brand);
-  color: #ffffff;
+  background: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  color: var(--color-ink);
 }
