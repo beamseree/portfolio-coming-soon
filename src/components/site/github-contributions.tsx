@@ -18,10 +18,19 @@ function Stat({ label, count }: { label: string; count: number }) {
 }
 
 /**
- * A GitHub user's last month of contributions as a bar per day, with totals.
- * Renders nothing when GitHub can't be read.
+ * A GitHub user's last month of contributions as a bar per day, with totals,
+ * under an optional title. Renders nothing, title included, when GitHub can't
+ * be read.
  */
-export async function GitHubContributions({ username, className }: { username: string; className?: string }) {
+export async function GitHubContributions({
+    username,
+    title,
+    className,
+}: {
+    username: string;
+    title?: string;
+    className?: string;
+}) {
     const days = await getContributions(username);
     if (!days) return null;
     // GitHub's calendar ends today, so its last day says what year it is.
@@ -30,6 +39,7 @@ export async function GitHubContributions({ username, className }: { username: s
 
     return (
         <section className={cn("flex flex-col gap-4 text-body", className)}>
+            {title && <h2 className="border-b border-line pb-2 leading-[normal] text-muted">{title}</h2>}
             <ContributionGraph days={recent} />
             <dl className="flex flex-col gap-1 text-muted">
                 <Stat label={`Last ${DAYS_SHOWN} days`} count={total(recent)} />

@@ -74,7 +74,7 @@ export default function Home() {
           </p>
         </div>
 
-        <GitHubContributions username="beamseree" className="py-5" />
+        <GitHubContributions username="beamseree" title="Contributions" className="pt-8 pb-5" />
 
         <footer className="flex items-center justify-between whitespace-nowrap text-muted">
           <p>Bangkok, Thailand</p>
