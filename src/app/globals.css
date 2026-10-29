@@ -25,8 +25,8 @@
   /* Matte is spaced looser and drawn lighter than Muoto, the face the site
      was designed in. This tracking brings back Muoto's line lengths, so the
      bio wraps where it did, and the weight sits a shade darker than it. */
-  --text-body--letter-spacing: -0.21px;
-  --text-body--font-weight: 460;
+  --text-body--letter-spacing: -0.19px;
+  --text-body--font-weight: 475;
 
   /* A flip clock digit: the flap folds from the top half to the bottom, and
      the pieces around it stay visible only while it does. */
