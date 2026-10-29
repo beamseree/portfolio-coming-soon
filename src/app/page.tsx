@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { DitherWordmark } from "@/components/site/dither-wordmark";
+import { GitHubContributions } from "@/components/site/github-contributions";
 import { LocalTime } from "@/components/site/local-time";
 import { ThemeToggle } from "@/components/site/theme-toggle";
 import { VendingSky } from "@/components/site/vending-sky";
@@ -74,17 +74,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="py-5">
-          <div className="flex items-center justify-center rounded-lg bg-surface px-4 py-[50px] transition-colors">
-            <Image
-              src="/brand/website-coming-soon.svg"
-              alt="Website coming soon"
-              width={195}
-              height={21}
-              className="h-auto w-[194.887px] max-w-full"
-            />
-          </div>
-        </div>
+        <GitHubContributions username="beamseree" className="py-5" />
 
         <footer className="flex items-center justify-between whitespace-nowrap text-muted">
           <p>Bangkok, Thailand</p>
