@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
+import { DitherCutouts } from "@/components/site/dither-cutouts";
 import { DitherSky } from "@/components/site/dither-sky";
 import { cn } from "@/lib/utils";
 
@@ -55,14 +56,14 @@ function place({ x, y, w, h }: Box): CSSProperties {
     };
 }
 
-function Cutout({ src, crop, className }: { src: string; crop: Crop; className: string }) {
+function Cutout({ src, crop, layer, className }: { src: string; crop: Crop; layer: "day" | "night"; className: string }) {
     const [left, top, width, height] = crop;
     return (
         <div
             className={cn("absolute", className)}
             style={{ left: `${left}%`, top: `${top}%`, width: `${width}%`, height: `${height}%` }}
         >
-            <Image src={src} alt="" fill sizes="110px" loading="eager" />
+            <Image src={src} alt="" fill sizes="110px" loading="eager" data-cutout={layer} />
         </div>
     );
 }
@@ -78,23 +79,29 @@ export function VendingSky({ className }: { className?: string }) {
             <div className="absolute" style={place(SKY)}>
                 <DitherSky className="size-full" />
             </div>
-            {MACHINES.map((machine) => (
-                <div key={machine.src} className="absolute overflow-hidden" style={place(machine)}>
-                    {/* The night machine fades in over the day one, in step with the sky's
-                        dusk (DUSK_SECONDS). The day one stays visible underneath until the
-                        fade ends, so the sky never shows through mid-way. */}
-                    <Cutout
-                        src={machine.src}
-                        crop={machine.crop}
-                        className="transition-[visibility] duration-500 dark:invisible motion-reduce:transition-none"
-                    />
-                    <Cutout
-                        src={machine.src.replace("/vending/", "/vending/night/")}
-                        crop={machine.nightCrop}
-                        className="opacity-0 transition-opacity duration-500 ease-[ease-in-out] dark:opacity-100 motion-reduce:transition-none"
-                    />
-                </div>
-            ))}
+            {/* Dithered like the sky. The plain machines below are what it paints
+                from, and what shows when WebGL2 is unavailable. */}
+            <DitherCutouts className="absolute inset-0">
+                {MACHINES.map((machine) => (
+                    <div key={machine.src} data-slot className="absolute overflow-hidden" style={place(machine)}>
+                        {/* The night machine fades in over the day one, in step with the sky's
+                            dusk (DUSK_SECONDS). The day one stays visible underneath until the
+                            fade ends, so the sky never shows through mid-way. */}
+                        <Cutout
+                            src={machine.src}
+                            crop={machine.crop}
+                            layer="day"
+                            className="transition-[visibility] duration-500 dark:invisible motion-reduce:transition-none"
+                        />
+                        <Cutout
+                            src={machine.src.replace("/vending/", "/vending/night/")}
+                            crop={machine.nightCrop}
+                            layer="night"
+                            className="opacity-0 transition-opacity duration-500 ease-[ease-in-out] dark:opacity-100 motion-reduce:transition-none"
+                        />
+                    </div>
+                ))}
+            </DitherCutouts>
         </div>
     );
 }

@@ -6,6 +6,9 @@ export type Theme = "light" | "dark";
 const STORAGE_KEY = "theme";
 const DEFAULT_THEME: Theme = "light";
 
+/** How long the dithered scenes take to turn from day to night when the theme changes. */
+export const DUSK_SECONDS = 0.5;
+
 /**
  * Inlined in <head> so it runs before first paint: applies the visitor's saved
  * theme, or light when they haven't picked one.

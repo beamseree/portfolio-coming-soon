@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { getTheme, subscribeTheme } from "@/lib/theme";
+import { DUSK_SECONDS, getTheme, subscribeTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 type DitherSkyProps = {
@@ -73,9 +73,6 @@ function cloudCounts(aspect: number) {
 
 const MAX_PUFFS = 64;
 const HEADER_TEXELS = 3;
-
-// How long the sky takes to turn from day to night when the theme changes.
-const DUSK_SECONDS = 0.5;
 
 function mulberry32(seed: number) {
     let a = seed >>> 0;
