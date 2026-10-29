@@ -12,6 +12,7 @@
   --color-muted: #9393a1;
   --color-surface: #f7f7f9;
   --color-line: #f2f2f2;
+  --color-underline: #d9d9de;
   --color-brand: #3352ff;
 
   /* GitHub's contribution greens, from a day off to the busiest day. */
@@ -73,6 +74,7 @@
   --color-muted: #ababb9;
   --color-surface: #18191f;
   --color-line: #1c1c22;
+  --color-underline: #2d2e34;
   --color-contrib-0: #22232b;
   --color-contrib-1: #0e4429;
   --color-contrib-2: #006d32;

@@ -11,7 +11,7 @@ function TextLink({ href, children }: { href: string; children: string }) {
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      className="text-ink underline decoration-muted/50 decoration-1 underline-offset-[3px] transition-colors hover:decoration-ink"
+      className="-mx-0.5 rounded-xs px-0.5 text-ink underline decoration-underline decoration-1 underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-ink focus-visible:outline-2 focus-visible:outline-brand"
     >
       {children}
     </a>
