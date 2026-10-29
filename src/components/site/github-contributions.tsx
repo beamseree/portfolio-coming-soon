@@ -17,9 +17,13 @@ function Stat({ label, count }: { label: string; count: number }) {
     );
 }
 
-/** A GitHub user's last month of contributions as a bar per day, with totals. */
+/**
+ * A GitHub user's last month of contributions as a bar per day, with totals.
+ * Renders nothing when GitHub can't be read.
+ */
 export async function GitHubContributions({ username, className }: { username: string; className?: string }) {
     const days = await getContributions(username);
+    if (!days) return null;
     // GitHub's calendar ends today, so its last day says what year it is.
     const year = days[days.length - 1].date.slice(0, 4);
     const recent = days.slice(-DAYS_SHOWN);

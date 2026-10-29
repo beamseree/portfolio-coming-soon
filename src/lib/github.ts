@@ -10,11 +10,24 @@ export type ContributionDay = {
  * Someone's contributions for each day of the past year, oldest first, read
  * from the calendar on their GitHub profile. Unlike the GraphQL API it needs no
  * token, but it only has daily counts, not which repos they went to.
+ *
+ * Null when GitHub can't be reached or its calendar can't be read, so a page
+ * can leave the graph out rather than fail; that's tried again after a minute.
  */
-export async function getContributions(username: string): Promise<ContributionDay[]> {
+export async function getContributions(username: string): Promise<ContributionDay[] | null> {
     "use cache";
-    cacheLife("hours");
+    try {
+        const days = await readCalendar(username);
+        cacheLife("hours");
+        return days;
+    } catch (error) {
+        console.error(error);
+        cacheLife("minutes");
+        return null;
+    }
+}
 
+async function readCalendar(username: string): Promise<ContributionDay[]> {
     const response = await fetch(`https://github.com/users/${encodeURIComponent(username)}/contributions`);
     if (!response.ok) throw new Error(`Couldn't load ${username}'s contributions from GitHub (${response.status})`);
     const html = await response.text();
