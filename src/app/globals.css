@@ -8,8 +8,8 @@
 
 @theme {
   --color-background: #ffffff;
-  --color-ink: #303036;
-  --color-muted: #9d9dad;
+  --color-ink: #131319;
+  --color-muted: #9393a1;
   --color-surface: #f7f7f9;
   --color-brand: #3352ff;
 
@@ -68,8 +68,8 @@
 /* Set on <html> by the theme script in the root layout. */
 :root[data-theme="dark"] {
   --color-background: #0f1015;
-  --color-ink: #e6e6ee;
-  --color-muted: #6e6e7d;
+  --color-ink: #f4f5fd;
+  --color-muted: #ababb9;
   --color-surface: #18191f;
   --color-contrib-0: #22232b;
   --color-contrib-1: #0e4429;
