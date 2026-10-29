@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import type { ContributionDay } from "@/lib/github";
+import { useSound } from "@/lib/use-sound";
 import { cn } from "@/lib/utils";
 
 // From a day off to the busiest day in view, in quarters.
@@ -19,10 +20,12 @@ function describe(count: number) {
 
 /**
  * A bar for each day, greener the busier it was. Hovering one stretches it
- * taller, its neighbours halfway, and raises a tooltip with the day's count.
+ * taller, its neighbours halfway, raises a tooltip with the day's count, and
+ * plays a click, so sweeping across the graph clicks along it.
  */
 export function ContributionGraph({ days, className }: { days: ContributionDay[]; className?: string }) {
     const [active, setActive] = useState<number | null>(null);
+    const tap = useSound("/sounds/clean-click.wav", { pitch: -2, spread: 0.05, volume: 0.2 });
     const rowRef = useRef<HTMLDivElement>(null);
     const tipRefs = useRef<(HTMLDivElement | null)[]>([]);
     const busiest = Math.max(1, ...days.map((day) => day.count));
@@ -54,15 +57,19 @@ export function ContributionGraph({ days, className }: { days: ContributionDay[]
             aria-label={days.length ? `Daily contributions, ${formatDate(days[0].date)} to ${formatDate(days[days.length - 1].date)}` : undefined}
             onMouseLeave={() => setActive(null)}
             // Each bar's hover area takes half of the gap on either side, so the
-            // pointer never falls between bars and drops the tooltip.
-            className={cn("relative -mx-[1.5px] flex", className)}
+            // pointer never falls between bars and drops the tooltip. Dragging
+            // across the bars would otherwise select the hidden tooltips' text.
+            className={cn("relative -mx-[1.5px] flex select-none", className)}
         >
             {days.map((day, index) => {
                 const distance = active === null ? Infinity : Math.abs(active - index);
                 return (
                     <div
                         key={day.date}
-                        onMouseEnter={() => setActive(index)}
+                        onMouseEnter={() => {
+                            setActive(index);
+                            tap();
+                        }}
                         className="relative flex h-5 flex-1 items-center px-[1.5px]"
                     >
                         <div
