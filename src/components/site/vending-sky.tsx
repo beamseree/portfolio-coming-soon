@@ -84,20 +84,20 @@ export function VendingSky({ className }: { className?: string }) {
             <DitherCutouts className="absolute inset-0">
                 {MACHINES.map((machine) => (
                     <div key={machine.src} data-slot className="absolute overflow-hidden" style={place(machine)}>
-                        {/* The night machine fades in over the day one, in step with the sky's
-                            dusk (DUSK_SECONDS). The day one stays visible underneath until the
+                        {/* The night machine fades in over the day one, in step with
+                            DitherCutouts' dusk. The day one stays visible underneath until the
                             fade ends, so the sky never shows through mid-way. */}
                         <Cutout
                             src={machine.src}
                             crop={machine.crop}
                             layer="day"
-                            className="transition-[visibility] duration-500 dark:invisible motion-reduce:transition-none"
+                            className="transition-[visibility] duration-150 dark:invisible motion-reduce:transition-none"
                         />
                         <Cutout
                             src={machine.src.replace("/vending/", "/vending/night/")}
                             crop={machine.nightCrop}
                             layer="night"
-                            className="opacity-0 transition-opacity duration-500 ease-[ease-in-out] dark:opacity-100 motion-reduce:transition-none"
+                            className="opacity-0 transition-opacity duration-150 ease-[ease-in-out] dark:opacity-100 motion-reduce:transition-none"
                         />
                     </div>
                 ))}

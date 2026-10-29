@@ -86,7 +86,8 @@
 body {
   background: var(--color-background);
   color: var(--color-ink);
-  /* Matches Tailwind's transition-colors, so the surface card keeps pace. */
+  /* Text inherits this fade. Matches Tailwind's transition-colors, which the
+     muted text and contribution bars use, so the whole page fades together. */
   transition:
     background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
     color 150ms cubic-bezier(0.4, 0, 0.2, 1);

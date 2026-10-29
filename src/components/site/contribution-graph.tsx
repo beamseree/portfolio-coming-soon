@@ -92,7 +92,12 @@ export function ContributionGraph({ days, className }: { days: ContributionDay[]
                         <div
                             style={{ animationDelay: `${index * 20}ms` }}
                             className={cn(
-                                "h-[calc(var(--bar)*1.75)] w-full origin-bottom animate-bar-in transition-[clip-path] duration-100 ease-in-out motion-reduce:animate-none motion-reduce:transition-none",
+                                "h-[calc(var(--bar)*1.75)] w-full origin-bottom animate-bar-in motion-reduce:animate-none",
+                                // The colour fades with the theme, in step with the
+                                // text, and the clip moves on hover. Reduced motion
+                                // keeps just the colour, which is listed first so it
+                                // keeps its own timing.
+                                "transition-[background-color,clip-path] duration-[150ms,100ms] ease-[cubic-bezier(0.4,0,0.2,1),ease-in-out] motion-reduce:transition-[background-color]",
                                 "[clip-path:inset(calc(var(--bar)*0.75)_0_0_round_3px)]",
                                 LEVELS[Math.ceil((day.count / busiest) * 4)],
                                 distance === 0 && "[clip-path:inset(0_round_3px)]",

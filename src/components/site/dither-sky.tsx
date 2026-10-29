@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { DUSK_SECONDS, getTheme, subscribeTheme } from "@/lib/theme";
+import { getTheme, subscribeTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 type DitherSkyProps = {
@@ -18,6 +18,8 @@ type DitherSkyProps = {
     speed?: number;
     /** Re-roll the edge speckle a few times a second, like boiling line art. */
     boil?: boolean;
+    /** Seconds to turn from day to night, or back, when the theme changes. */
+    dusk?: number;
     /** A small bird that glides across now and then (by day). */
     bird?: boolean;
     /** Seed for the cloud layout. */
@@ -429,6 +431,7 @@ export function DitherSky({
     levels = 24,
     speed = 1,
     boil = true,
+    dusk = 0.15,
     bird = true,
     seed = 4,
     fallbackSrc = "/sky/clouds.webp",
@@ -546,7 +549,7 @@ export function DitherSky({
             last = now;
             if (pending < frameMs - 2) return;
             elapsed += pending / 1000;
-            const step = pending / 1000 / DUSK_SECONDS;
+            const step = pending / 1000 / dusk;
             night = nightTarget > night ? Math.min(nightTarget, night + step) : Math.max(nightTarget, night - step);
             pending = 0;
             draw();
@@ -615,7 +618,7 @@ export function DitherSky({
             document.removeEventListener("visibilitychange", sync);
             reducedMotion.removeEventListener("change", sync);
         };
-    }, [pixelSize, border, grain, levels, speed, boil, bird, seed, fallbackSrc]);
+    }, [pixelSize, border, grain, levels, speed, boil, dusk, bird, seed, fallbackSrc]);
 
     return (
         <div className={cn("relative", className)}>

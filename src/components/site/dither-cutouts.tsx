@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { DUSK_SECONDS, getTheme, subscribeTheme } from "@/lib/theme";
+import { getTheme, subscribeTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 type DitherCutoutsProps = {
@@ -21,6 +21,8 @@ type DitherCutoutsProps = {
     shade?: number;
     /** Re-roll the edge speckle a few times a second, like boiling line art. */
     boil?: boolean;
+    /** Seconds to turn from day to night, or back, when the theme changes. */
+    dusk?: number;
 };
 
 // Room around the cutouts, in CSS pixels, so speckle on an outer edge isn't
@@ -125,8 +127,8 @@ const LAYERS = ["day", "night"] as const;
 /**
  * Image cutouts finished like the sky: ordered dithering, film grain and a
  * boiling, speckled outline, all on one canvas however many cutouts there are.
- * The day and night cutouts turn over with the theme, in step with the sky's
- * dusk. The plain images stay underneath, for layout and as the fallback when
+ * The day and night cutouts turn over with the theme, over `dusk` seconds.
+ * The plain images stay underneath, for layout and as the fallback when
  * WebGL2 is unavailable, and the canvas paints from them, so nothing downloads
  * twice. Pauses off-screen and in hidden tabs, and holds a still frame when
  * the visitor prefers reduced motion.
@@ -139,6 +141,7 @@ export function DitherCutouts({
     levels = 24,
     shade = 0.15,
     boil = true,
+    dusk = 0.15,
 }: DitherCutoutsProps) {
     const plainRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -268,7 +271,7 @@ export function DitherCutouts({
             const frameMs = night === nightTarget ? 1000 / 12 : 1000 / 30;
             if (pending < frameMs - 2) return;
             elapsed += pending / 1000;
-            const step = pending / 1000 / DUSK_SECONDS;
+            const step = pending / 1000 / dusk;
             night = nightTarget > night ? Math.min(nightTarget, night + step) : Math.max(nightTarget, night - step);
             pending = 0;
             draw();
@@ -355,7 +358,7 @@ export function DitherCutouts({
             }
             plain.style.opacity = "";
         };
-    }, [pixelSize, grain, levels, shade, boil]);
+    }, [pixelSize, grain, levels, shade, boil, dusk]);
 
     return (
         <div className={cn("relative", className)}>

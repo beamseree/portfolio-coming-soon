@@ -39,9 +39,9 @@ export async function GitHubContributions({
 
     return (
         <section className={cn("flex flex-col gap-4 text-body", className)}>
-            {title && <h2 className="border-b border-line pb-2 leading-[normal] text-muted">{title}</h2>}
+            {title && <h2 className="border-b border-line pb-2 leading-[normal] text-muted transition-colors">{title}</h2>}
             <ContributionGraph days={recent} />
-            <dl className="flex flex-col gap-1 text-muted">
+            <dl className="flex flex-col gap-1 text-muted transition-colors">
                 <Stat label={`Last ${DAYS_SHOWN} days`} count={total(recent)} />
                 <Stat label="Year to date" count={total(days.filter((day) => day.date.startsWith(year)))} />
             </dl>

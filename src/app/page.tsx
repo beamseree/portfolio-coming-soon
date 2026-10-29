@@ -11,7 +11,7 @@ function TextLink({ href, children }: { href: string; children: string }) {
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      className="-mx-0.5 rounded-xs px-0.5 text-ink underline decoration-underline decoration-1 underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-ink focus-visible:outline-2 focus-visible:outline-brand"
+      className="-mx-0.5 rounded-xs px-0.5 underline decoration-underline decoration-1 underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-ink focus-visible:outline-2 focus-visible:outline-brand"
     >
       {children}
     </a>
@@ -21,11 +21,11 @@ function TextLink({ href, children }: { href: string; children: string }) {
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center overflow-x-clip px-4 pt-20 pb-20">
-      <div className="flex w-full max-w-[550px] flex-col gap-4 text-body text-ink">
+      <div className="flex w-full max-w-[550px] flex-col gap-4 text-body">
         <header className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1 whitespace-nowrap leading-[normal]">
             <h1>Beam Sereeyothin</h1>
-            <p className="text-muted">Engineer &amp; Designer</p>
+            <p className="text-muted transition-colors">Engineer &amp; Designer</p>
           </div>
           <DitherWordmark
             src="/brand/beamseree.svg"
@@ -76,7 +76,7 @@ export default function Home() {
 
         <GitHubContributions username="beamseree" title="Contributions" className="pt-8 pb-5" />
 
-        <footer className="flex items-center justify-between whitespace-nowrap text-muted">
+        <footer className="flex items-center justify-between whitespace-nowrap text-muted transition-colors">
           <p>Bangkok, Thailand</p>
           <div className="flex items-center gap-3">
             <LocalTime timeZone="Asia/Bangkok" />
