@@ -4,13 +4,13 @@ export type Theme = "light" | "dark";
 // here reads and writes that attribute, so it's the single source of truth.
 
 const STORAGE_KEY = "theme";
-const DARK_QUERY = "(prefers-color-scheme: dark)";
+const DEFAULT_THEME: Theme = "light";
 
 /**
  * Inlined in <head> so it runs before first paint: applies the visitor's saved
- * theme, or the system's when they haven't picked one.
+ * theme, or light when they haven't picked one.
  */
-export const themeScript = `(function(){var t;try{t=localStorage.getItem("${STORAGE_KEY}")}catch(e){}if(t!=="light"&&t!=="dark")t=matchMedia("${DARK_QUERY}").matches?"dark":"light";document.documentElement.dataset.theme=t})()`;
+export const themeScript = `(function(){var t;try{t=localStorage.getItem("${STORAGE_KEY}")}catch(e){}if(t!=="light"&&t!=="dark")t="${DEFAULT_THEME}";document.documentElement.dataset.theme=t})()`;
 
 function savedTheme(): Theme | null {
     try {
@@ -46,21 +46,15 @@ export function subscribeTheme(onChange: () => void) {
 }
 
 /**
- * Re-applies the visitor's theme, then keeps it current: follows the system
- * while they haven't picked one, and picks up a choice made in another tab.
- * Returns a cleanup.
+ * Re-applies the visitor's theme, then keeps it current by picking up a choice
+ * made in another tab. Returns a cleanup.
  */
 export function syncTheme() {
-    const system = window.matchMedia(DARK_QUERY);
-    const update = () => apply(savedTheme() ?? (system.matches ? "dark" : "light"));
+    const update = () => apply(savedTheme() ?? DEFAULT_THEME);
     const onStorage = (event: StorageEvent) => {
         if (event.key === STORAGE_KEY) update();
     };
     update();
-    system.addEventListener("change", update);
     window.addEventListener("storage", onStorage);
-    return () => {
-        system.removeEventListener("change", update);
-        window.removeEventListener("storage", onStorage);
-    };
+    return () => window.removeEventListener("storage", onStorage);
 }
