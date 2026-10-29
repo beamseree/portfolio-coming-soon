@@ -75,7 +75,13 @@ export function ContributionGraph({ days, className }: { days: ContributionDay[]
                             tap();
                         }}
                         // Bars stand on the bottom edge, so they stretch upward.
-                        className="relative flex h-(--bar) flex-1 items-end px-[1.5px]"
+                        // While one is hovered, every bar's hover area reaches as
+                        // high as it and the gap above it, so the pointer can sweep
+                        // along the tops of the stretched bars without falling off.
+                        className={cn(
+                            "relative flex h-(--bar) flex-1 items-end px-[1.5px]",
+                            active !== null && "before:absolute before:inset-x-0 before:bottom-0 before:h-[calc(var(--bar)*1.75_+_6px)]",
+                        )}
                     >
                         {/* Each bar is drawn at its hovered height, 1.75 times
                             its resting one, and clipped down from the top: to
