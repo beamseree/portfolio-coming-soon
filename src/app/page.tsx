@@ -1,9 +1,21 @@
-import { DitherWordmark } from "@/components/site/dither-wordmark";
+// import { DitherWordmark } from "@/components/site/dither-wordmark";
 import { GitHubContributions } from "@/components/site/github-contributions";
-import { LocalTime } from "@/components/site/local-time";
+// import { LocalTime } from "@/components/site/local-time";
+import { MusicToggle } from "@/components/site/music-toggle";
 import { MuteToggle } from "@/components/site/mute-toggle";
+import { Projects, type Project } from "@/components/site/projects";
 import { ThemeToggle } from "@/components/site/theme-toggle";
 import { VendingSky } from "@/components/site/vending-sky";
+
+// The years and notes are placeholders for now.
+const PROJECTS: Project[] = [
+  { year: 2026, title: "Matte", note: "Ongoing" },
+  { year: 2026, title: "Hana" },
+  { year: 2026, title: "Tino & Aumo" },
+  { year: 2025, title: "Filler", note: "Ongoing" },
+  { year: 2025, title: "Axiom Design System" },
+  { year: 2024, title: "BEMO" },
+];
 
 function TextLink({ href, children }: { href: string; children: string }) {
   const external = href.startsWith("http");
@@ -23,11 +35,12 @@ export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center overflow-x-clip px-4 pt-20 pb-20">
       <div className="flex w-full max-w-[550px] flex-col gap-4 text-body">
-        <header className="flex items-center justify-between gap-4">
+        <header className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1 whitespace-nowrap leading-[normal]">
             <h1>Beam Sereeyothin</h1>
             <p className="text-muted transition-colors">Engineer &amp; Designer</p>
           </div>
+          {/* Hidden for now
           <DitherWordmark
             src="/brand/beamseree.svg"
             alt="@beamseree"
@@ -35,6 +48,15 @@ export default function Home() {
             height={37}
             className="w-[200px] min-w-0"
           />
+          */}
+          <div className="flex h-[1lh] items-center gap-3.5 whitespace-nowrap leading-[normal] text-muted transition-colors">
+            {/* Hidden for now
+            <LocalTime timeZone="Asia/Bangkok" />
+            */}
+            <MuteToggle />
+            <ThemeToggle />
+            <MusicToggle className="ml-px" />
+          </div>
         </header>
 
         <div className="py-5">
@@ -70,21 +92,20 @@ export default function Home() {
           <p>
             You can find me on <TextLink href="https://x.com/beamseree">X</TextLink>{" "}
             and{" "}
-            <TextLink href="https://instagram.com/beamseree">Instagram</TextLink>
+            <TextLink href="https://github.com/beamseree">GitHub</TextLink>
             , or reach me via <TextLink href="#">email</TextLink>.
           </p>
         </div>
 
+        <Projects projects={PROJECTS} title="Projects" className="pt-8" />
+
         <GitHubContributions username="beamseree" title="Contributions" className="pt-8 pb-5" />
 
-        <footer className="flex items-center justify-between whitespace-nowrap text-muted transition-colors">
+        {/* Hidden for now
+        <footer className="whitespace-nowrap text-muted transition-colors">
           <p>Bangkok, Thailand</p>
-          <div className="flex items-center gap-3">
-            <LocalTime timeZone="Asia/Bangkok" />
-            <MuteToggle />
-            <ThemeToggle />
-          </div>
         </footer>
+        */}
       </div>
     </main>
   );

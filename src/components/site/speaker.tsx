@@ -7,10 +7,13 @@ import { cn } from "@/lib/utils";
 const DURATION = 500;
 
 // In the icon's 24-unit box. The speaker's mouth opens at x 11, and its sound
-// waves are quarter circles of r 5 and r 9 around (12, 12). The muted X sits
-// beside it, centred on (19, 12).
-const SPEAKER = "M11 5 6.5 9H3a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3.5L11 19Z";
+// waves are arcs of r 5 and r 9 around (12, 12), reaching 52° either side of
+// level. Both stand a little taller than a plain speaker's, so it carries as
+// much weight as the sun and moon beside it, which fill more of the box. The
+// muted X sits beside it, centred on (19, 12).
+const SPEAKER = "M11 4 6.5 8.5H3a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h3.5L11 20Z";
 const WAVE_RADII = [5, 9];
+const WAVE_REACH = (52 * Math.PI) / 180;
 const CROSS: [number, number, number, number][] = [
     [16, 9, 22, 15],
     [22, 9, 16, 15],
@@ -46,8 +49,9 @@ const spring = cubicBezier(0.34, 1.56, 0.64, 1);
 
 /** A sound wave of radius `r`. */
 function wave(r: number) {
-    const x = round(12 + r * Math.SQRT1_2);
-    return `M${x} ${round(12 - r * Math.SQRT1_2)}A${round(r)} ${round(r)} 0 0 1 ${x} ${round(12 + r * Math.SQRT1_2)}`;
+    const x = round(12 + r * Math.cos(WAVE_REACH));
+    const rise = r * Math.sin(WAVE_REACH);
+    return `M${x} ${round(12 - rise)}A${round(r)} ${round(r)} 0 0 1 ${x} ${round(12 + rise)}`;
 }
 
 const WAVES = WAVE_RADII.map(wave);

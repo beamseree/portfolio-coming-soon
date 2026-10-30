@@ -11,6 +11,9 @@
   --color-background: #ffffff;
   --color-ink: #131319;
   --color-muted: #9393a1;
+  /* A step further back than muted, for what's set aside while something
+     else is hovered. */
+  --color-faint: #c0c0c9;
   --color-surface: #f7f7f9;
   --color-line: #f2f2f2;
   --color-underline: #d9d9de;
@@ -73,6 +76,7 @@
   --color-background: #0f1015;
   --color-ink: #f4f5fd;
   --color-muted: #ababb9;
+  --color-faint: #6c6d79;
   --color-surface: #18191f;
   --color-line: #1c1c22;
   --color-underline: #56575f;
