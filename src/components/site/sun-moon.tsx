@@ -4,11 +4,25 @@ import { useEffect, useId, useRef, useState, useSyncExternalStore, type CSSPrope
 import type { Theme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
-/** How long the sun takes to become the moon, and back. */
+/** How long the shadow takes to swing in across the sun, and back out. */
 const DURATION = 500;
 
-// The disc, shadow and turn all move on one curve. The rays spring back out at
-// sunrise.
+/**
+ * How long the disc takes to swell to the moon's size, or shrink back to the
+ * sun's. It starts on the click, without waiting, so the icon answers at once.
+ */
+const GROW = 200;
+
+/**
+ * How long the shadow holds before it swings. The page fades to the new theme
+ * over 150ms (globals.css), and most of the swing's movement comes early, so
+ * starting together would spend it in the flash. Waiting that out plays it
+ * against the new theme.
+ */
+const WAIT = 150;
+
+// The disc, shadow and turn all move on one curve, each on its own clock. The
+// rays spring back out at sunrise.
 const EASE = "cubic-bezier(0.2, 0, 0, 1)";
 const SPRING = "cubic-bezier(0.34, 1.56, 0.64, 1)";
 
@@ -84,10 +98,11 @@ function subscribeReducedMotion(onChange: () => void) {
 const prefersReducedMotion = () => window.matchMedia(REDUCED_MOTION).matches;
 
 /**
- * 0 by day and 1 by night, eased from one to the other over `duration`. A
- * switch back mid-way turns around from wherever it had got to.
+ * 0 by day and 1 by night, eased from one to the other over `duration` once
+ * `wait` has passed. A switch back mid-way turns around from wherever it had
+ * got to.
  */
-function useProgress(dark: boolean, duration: number) {
+function useProgress(dark: boolean, duration: number, wait: number) {
     const [progress, setProgress] = useState(dark ? 1 : 0);
     const current = useRef(progress);
 
@@ -96,23 +111,23 @@ function useProgress(dark: boolean, duration: number) {
         const to = dark ? 1 : 0;
         if (from === to) return;
         const span = duration * Math.abs(to - from);
-        const start = performance.now();
+        const start = performance.now() + wait;
         let frame = requestAnimationFrame(function step(now) {
-            const t = span > 0 ? Math.min(1, (now - start) / span) : 1;
+            const t = span > 0 ? Math.min(1, Math.max(0, now - start) / span) : 1;
             current.current = mix(from, to, ease(t));
             setProgress(current.current);
             if (t < 1) frame = requestAnimationFrame(step);
         });
         return () => cancelAnimationFrame(frame);
-    }, [dark, duration]);
+    }, [dark, duration, wait]);
 
     return progress;
 }
 
-// By night the rays draw into the disc one after another. By day they wait for
-// the shadow to clear, then spring back out.
-function rayStyle(dark: boolean, duration: number, index: number): CSSProperties {
-    const delay = (dark ? index * 0.03 : 0.25 + index * 0.04) * duration;
+// By night the rays draw into the disc one after another as it swells. By day
+// they wait for the shadow to clear, then spring back out.
+function rayStyle(dark: boolean, duration: number, wait: number, index: number): CSSProperties {
+    const delay = dark ? index * 0.03 * duration : wait + (0.25 + index * 0.04) * duration;
     return {
         transformOrigin: "12px 12px",
         transform: dark ? "scale(0)" : "scale(1)",
@@ -125,15 +140,18 @@ function rayStyle(dark: boolean, duration: number, index: number): CSSProperties
 
 type FigureProps = {
     dark: boolean;
-    /** 0 for the sun, 1 for the moon. */
+    /** The disc's size: 0 for the sun's, 1 for the moon's. */
+    grow: number;
+    /** The shadow and turn: 0 for the sun, 1 for the moon. */
     progress: number;
     duration: number;
+    wait: number;
     className?: string;
 };
 
-function Figure({ dark, progress, duration, className }: FigureProps) {
+function Figure({ dark, grow, progress, duration, wait, className }: FigureProps) {
     const mask = useId();
-    const radius = mix(SUN_RADIUS, MOON_RADIUS, progress);
+    const radius = mix(SUN_RADIUS, MOON_RADIUS, grow);
     const away = 1 - progress;
 
     return (
@@ -162,7 +180,7 @@ function Figure({ dark, progress, duration, className }: FigureProps) {
                 <g mask={`url(#${mask})`}>
                     {RAY_ANGLES.map((angle, i) => (
                         <g key={angle} transform={`rotate(${angle} 12 12)`}>
-                            <line x1="12" y1="4" x2="12" y2="2" style={rayStyle(dark, duration, i)} />
+                            <line x1="12" y1="4" x2="12" y2="2" style={rayStyle(dark, duration, wait, i)} />
                         </g>
                     ))}
                 </g>
@@ -174,13 +192,18 @@ function Figure({ dark, progress, duration, className }: FigureProps) {
 function Morphing({ dark, className }: { dark: boolean; className?: string }) {
     const reduced = useSyncExternalStore(subscribeReducedMotion, prefersReducedMotion, () => false);
     const duration = reduced ? 0 : DURATION;
-    const progress = useProgress(dark, duration);
-    return <Figure dark={dark} progress={progress} duration={duration} className={className} />;
+    const wait = reduced ? 0 : WAIT;
+    const grow = useProgress(dark, reduced ? 0 : GROW, 0);
+    const progress = useProgress(dark, duration, wait);
+    return (
+        <Figure dark={dark} grow={grow} progress={progress} duration={duration} wait={wait} className={className} />
+    );
 }
 
 /**
- * A sun by day and a moon by night. On a switch, a shadow swings in across the
- * sun and bites out the crescent while the rays tuck away, and back again.
+ * A sun by day and a moon by night. On a switch, the sun swells to the moon's
+ * size as its rays tuck away, then a shadow swings in across it and bites out
+ * the crescent, and back again.
  * Holds still for visitors who prefer reduced motion.
  *
  * Before hydration the theme isn't known, so both are drawn at rest and CSS
@@ -190,8 +213,8 @@ export function SunMoon({ theme, className }: { theme: Theme | null; className?:
     if (!theme) {
         return (
             <>
-                <Figure dark={false} progress={0} duration={0} className={cn(className, "dark:hidden")} />
-                <Figure dark progress={1} duration={0} className={cn(className, "hidden dark:block")} />
+                <Figure dark={false} grow={0} progress={0} duration={0} wait={0} className={cn(className, "dark:hidden")} />
+                <Figure dark grow={1} progress={1} duration={0} wait={0} className={cn(className, "hidden dark:block")} />
             </>
         );
     }
