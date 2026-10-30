@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant sound-off (&:where([data-sound="off"], [data-sound="off"] *));
 
 @theme inline {
   --font-sans: var(--font-matte), var(--font-inter), ui-sans-serif, system-ui, sans-serif;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { isMuted } from "./sound";
 
 // One context plays every sound on the page. A context made before the page
 // has been clicked, tapped or typed on starts out blocked, so it's made on the
@@ -51,7 +52,7 @@ export type SoundOptions = {
 /**
  * Returns a function that plays a short sound, like a click. Browsers keep a
  * page silent until someone clicks, taps or types on it, so plays before then
- * go unheard.
+ * go unheard. Nothing plays while the visitor has muted the page.
  */
 export function useSound(src: string, { pitch = 0, spread = 0, volume = 1 }: SoundOptions = {}) {
     const buffer = useRef<AudioBuffer | null>(null);
@@ -69,6 +70,7 @@ export function useSound(src: string, { pitch = 0, spread = 0, volume = 1 }: Sou
     }, [src]);
 
     return useCallback(() => {
+        if (isMuted()) return;
         const audio = context;
         // Plays started while suspended would all go off at once on waking.
         if (!buffer.current || audio?.state !== "running") return;

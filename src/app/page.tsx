@@ -1,6 +1,7 @@
 import { DitherWordmark } from "@/components/site/dither-wordmark";
 import { GitHubContributions } from "@/components/site/github-contributions";
 import { LocalTime } from "@/components/site/local-time";
+import { MuteToggle } from "@/components/site/mute-toggle";
 import { ThemeToggle } from "@/components/site/theme-toggle";
 import { VendingSky } from "@/components/site/vending-sky";
 
@@ -80,6 +81,7 @@ export default function Home() {
           <p>Bangkok, Thailand</p>
           <div className="flex items-center gap-3">
             <LocalTime timeZone="Asia/Bangkok" />
+            <MuteToggle />
             <ThemeToggle />
           </div>
         </footer>

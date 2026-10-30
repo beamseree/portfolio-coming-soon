@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
+import { SoundScript } from "@/components/site/sound-script";
 import { ThemeScript } from "@/components/site/theme-script";
 import "./globals.css";
 
@@ -34,11 +35,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // The head script sets data-theme before React hydrates, so React would
-    // otherwise flag <html> as mismatched.
+    // The head scripts set data-theme and data-sound before React hydrates, so
+    // React would otherwise flag <html> as mismatched.
     <html lang="en" className={`${matte.variable} ${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <ThemeScript />
+        <SoundScript />
       </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
